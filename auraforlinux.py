@@ -1,16 +1,12 @@
 import subprocess
-import tkinter as tk
 from tkinter import messagebox, colorchooser
 import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
-import itertools
 
 # -----------------------------
 # Global Configuration
 # -----------------------------
 RAINBOW_COLORS = ["#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#8F00FF"]
 color_offset = 0  # Color offset for the rainbow title animation
-
 
 # -----------------------------
 # General Helpers
@@ -109,20 +105,25 @@ def show_color_buttons(mode):
 
     # Commands and labels dynamically adapted to the mode
     commands = {
-        "White": f"asusctl led-mode {mode} -c ffffff",
-        "Green": f"asusctl led-mode {mode} -c 00ff00",
-        "Blue": f"asusctl led-mode {mode} -c 0000ff",
+        "Red": f"asusctl led-mode {mode} -c ff0000",
+        "Orange": f"asusctl led-mode {mode} -c ff7f00",
         "Yellow": f"asusctl led-mode {mode} -c ffff00",
+        "Green": f"asusctl led-mode {mode} -c 00ff00",
+        "Cyan": f"asusctl led-mode {mode} -c 00ffff",
+        "Blue": f"asusctl led-mode {mode} -c 0000ff",
+        "Purple": f"asusctl led-mode {mode} -c 800080",
+        "Pink": f"asusctl led-mode {mode} -c ff1493",
+        "White": f"asusctl led-mode {mode} -c ffffff",
     }
-
-    # Create buttons for each command
-    for row, (label, command) in enumerate(commands.items()):
-        button = ttk.Button(color_frame, text=label, command=lambda cmd=command: execute_command(cmd), bootstyle="success-outline")
-        button.grid(row=row, column=0, padx=5, pady=5, sticky="ew")
 
     # Button for custom color
     custom_button = ttk.Button(color_frame, text="Custom Color", command=lambda: set_custom_color(mode), bootstyle="success-outline")
-    custom_button.grid(row=len(commands), column=0, padx=5, pady=5, sticky="ew")
+    custom_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+
+    # Create buttons for each command
+    for row, (label, command) in enumerate(commands.items(), start=1):
+        button = ttk.Button(color_frame, text=label, command=lambda cmd=command: execute_command(cmd), bootstyle="success-outline")
+        button.grid(row=row, column=0, padx=5, pady=5, sticky="ew")
 
     # Button to return to the main menu
     back_button = ttk.Button(color_frame, text="Back", command=show_main_menu, bootstyle="danger-outline")
@@ -131,12 +132,137 @@ def show_color_buttons(mode):
     # Configure column expansion in the color frame
     color_frame.grid_columnconfigure(0, weight=1)
 
+def show_cycle_menu():
+    """Displays a dropdown menu to select speed and an Accept button to execute the command."""
+    clear_window()
+
+    # Create a frame for the dropdown and buttons
+    cycle_frame = ttk.Frame(root)
+    cycle_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+
+    # Label for speed selection
+    label = ttk.Label(cycle_frame, text="Select Speed:", font=("Arial", 14))
+    label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+
+    # Mapping of display labels to actual command values
+    speed_options = {
+        "LOW": "low",
+        "MEDIUM": "med",
+        "HIGH": "high",
+    }
+
+    # Dropdown for speed options
+    selected_label = ttk.StringVar(value="MEDIUM")  # Default value
+    speed_dropdown = ttk.Combobox(
+        cycle_frame,
+        textvariable=selected_label,
+        values=list(speed_options.keys()),  # Display labels
+        state="readonly",  # Read-only dropdown
+        bootstyle="success",  # Corrected style
+    )
+    speed_dropdown.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+
+    # Accept button to execute the command
+    def execute_speed_command():
+        selected_speed = speed_options[selected_label.get()]  # Map label to command value
+        command = f"asusctl led-mode rainbow-cycle -s {selected_speed}"
+        execute_command(command)
+
+    accept_button = ttk.Button(
+        cycle_frame, text="Accept", command=execute_speed_command, bootstyle="success"
+    )
+    accept_button.grid(row=2, column=0, padx=5, pady=5, sticky="ew")
+
+    # Back button to return to the main menu
+    back_button = ttk.Button(
+        cycle_frame, text="Back", command=show_main_menu, bootstyle="danger-outline"
+    )
+    back_button.grid(row=3, column=0, padx=5, pady=5, sticky="ew")
+
+    # Configure column expansion in the cycle frame
+    cycle_frame.grid_columnconfigure(0, weight=1)
+
+
+def show_wave_menu():
+    """Displays dropdown menus to select speed and direction, and an Accept button to execute the command."""
+    clear_window()
+
+    # Create a frame for the dropdowns and buttons
+    wave_frame = ttk.Frame(root)
+    wave_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+
+    # Label for speed selection
+    speed_label = ttk.Label(wave_frame, text="Select Speed:", font=("Arial", 14))
+    speed_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+
+    # Mapping of speed labels to command values
+    speed_options = {
+        "LOW": "low",
+        "MEDIUM": "med",
+        "HIGH": "high",
+    }
+
+    # Dropdown for speed options
+    selected_speed_label = ttk.StringVar(value="MEDIUM")  # Default value
+    speed_dropdown = ttk.Combobox(
+        wave_frame,
+        textvariable=selected_speed_label,
+        values=list(speed_options.keys()),  # Display labels
+        state="readonly",
+        bootstyle="success",
+    )
+    speed_dropdown.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+
+    # Label for direction selection
+    direction_label = ttk.Label(wave_frame, text="Select Direction:", font=("Arial", 14))
+    direction_label.grid(row=2, column=0, padx=5, pady=5, sticky="w")
+
+    # Mapping of direction labels to command values
+    direction_options = {
+        "UP": "up",
+        "DOWN": "down",
+        "LEFT": "left",
+        "RIGHT": "right",
+    }
+
+    # Dropdown for direction options
+    selected_direction_label = ttk.StringVar(value="UP")  # Default value
+    direction_dropdown = ttk.Combobox(
+        wave_frame,
+        textvariable=selected_direction_label,
+        values=list(direction_options.keys()),  # Display labels
+        state="readonly",
+        bootstyle="success",
+    )
+    direction_dropdown.grid(row=3, column=0, padx=5, pady=5, sticky="ew")
+
+    # Accept button to execute the command
+    def execute_wave_command():
+        selected_speed = speed_options[selected_speed_label.get()]  # Map label to command value
+        selected_direction = direction_options[selected_direction_label.get()]  # Map label to command value
+        command = f"asusctl led-mode rainbow-wave -s {selected_speed} -d {selected_direction}"
+        execute_command(command)
+
+    accept_button = ttk.Button(
+        wave_frame, text="Accept", command=execute_wave_command, bootstyle="success"
+    )
+    accept_button.grid(row=4, column=0, padx=5, pady=5, sticky="ew")
+
+    # Back button to return to the main menu
+    back_button = ttk.Button(
+        wave_frame, text="Back", command=show_main_menu, bootstyle="danger-outline"
+    )
+    back_button.grid(row=5, column=0, padx=5, pady=5, sticky="ew")
+
+    # Configure column expansion in the wave frame
+    wave_frame.grid_columnconfigure(0, weight=1)
+
 
 def set_custom_color(mode):
     """Allows the user to select a custom color."""
     color_code = colorchooser.askcolor(title="Select a Color")
     if color_code and color_code[1]:
-        color_hex = color_code[1][1:]  # Remove the '#' at the beginning
+        color_hex = color_code[1][1:]
         command = f"asusctl led-mode {mode} -c {color_hex}"
         execute_command(command)
 
@@ -146,7 +272,7 @@ def set_custom_color(mode):
 # -----------------------------
 root = ttk.Window(themename="cyborg")
 root.title("Aura for Linux")
-root.geometry("800x600")
+root.geometry("500x720")
 
 # Global expansion configuration
 root.grid_rowconfigure(0, weight=1)
@@ -157,8 +283,8 @@ main_commands = {
     "STATIC": lambda: show_color_buttons("static"),
     "BREATHE": lambda: show_color_buttons("breathe"),
     "PULSE": lambda: show_color_buttons("pulse"),
-    "RAINBOW-CYCLE": lambda: execute_command("asusctl led-mode rainbow-cycle"),
-    "RAINBOW-WAVE": lambda: execute_command("asusctl led-mode rainbow-wave"),
+    "RAINBOW-CYCLE": lambda: show_cycle_menu(),
+    "RAINBOW-WAVE": lambda: show_wave_menu(),
     "OFF": lambda: execute_command("asusctl -k off"),
 }
 
