@@ -1,6 +1,17 @@
-# Environment variables
-.env
-
-# Virtual environments
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+build/
+dist/
+*.spec
+*.exe
+*.out
 venv/
 .env/
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
